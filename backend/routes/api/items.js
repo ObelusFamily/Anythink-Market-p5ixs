@@ -6,6 +6,8 @@ var User = mongoose.model("User");
 var auth = require("../auth");
 const { sendEvent } = require("../../lib/event");
 
+
+
 // Preload item objects on routes with ':item'
 router.param("item", function(req, res, next, slug) {
   Item.findOne({ slug: slug })
@@ -87,6 +89,7 @@ router.get("/", auth.optional, function(req, res, next) {
           items: await Promise.all(
             items.map(async function(item) {
               item.seller = await User.findById(item.seller);
+              if(item.image == "") item.image = "placeholder.png";
               return item.toJSONFor(user);
             })
           ),
