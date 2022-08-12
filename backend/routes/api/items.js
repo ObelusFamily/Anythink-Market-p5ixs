@@ -5,6 +5,9 @@ var Comment = mongoose.model("Comment");
 var User = mongoose.model("User");
 var auth = require("../auth");
 const { sendEvent } = require("../../lib/event");
+var dotenv = require("dotenv").config();
+
+
 
 // Preload item objects on routes with ':item'
 router.param("item", function(req, res, next, slug) {
@@ -87,6 +90,7 @@ router.get("/", auth.optional, function(req, res, next) {
           items: await Promise.all(
             items.map(async function(item) {
               item.seller = await User.findById(item.seller);
+              if(item.image == "") item.image = process.env.PLACEHOLDER_IMAGE;
               return item.toJSONFor(user);
             })
           ),
@@ -147,7 +151,6 @@ router.post("/", auth.required, function(req, res, next) {
       var item = new Item(req.body.item);
 
       item.seller = user;
-      if(item.image == "") item.image = 'placeholder.png';
 
       return item.save().then(function() {
         sendEvent('item_created', { item: req.body.item })
